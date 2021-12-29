@@ -7,6 +7,7 @@ import 'package:fund_manger/Page/funds.dart';
 import 'package:fund_manger/Page/memberOverview.dart';
 import 'package:fund_manger/Page/members.dart';
 import 'package:fund_manger/Page/paymentoverview.dart';
+
 void main() {
   runApp(MyApp());
 }
@@ -17,7 +18,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        debugShowCheckedModeBanner: false, home: AddFund());
+        debugShowCheckedModeBanner: false, home: PaymentOverview());
   }
 }
 
