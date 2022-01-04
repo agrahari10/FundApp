@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:fund_manger/Page/Cardoverview.dart';
-import 'package:fund_manger/Page/Record.dart';
-import 'package:fund_manger/Page/addfund.dart';
-import 'package:fund_manger/Page/funds.dart';
-import 'package:fund_manger/Page/memberOverview.dart';
-import 'package:fund_manger/Page/members.dart';
-import 'package:fund_manger/Page/paymentoverview.dart';
+
+import 'Page/screen.dart';
 void main() {
   runApp(MyApp());
 }
@@ -17,7 +12,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        debugShowCheckedModeBanner: false, home: AddFund());
+        debugShowCheckedModeBanner: false, home: SafeArea(child: Home()));
   }
 }
 
@@ -30,12 +25,17 @@ class Home extends StatelessWidget {
     return Scaffold(
       body: SafeArea(
         child: Center(
-          child: FundAvailable(),
-          // child: Homescreen(
-          //   size: size,
-          //   name: 'Continue with google',
-          //   icon: FaIcon(FontAwesomeIcons.google),
-          // ),
+          // child: FundAvailable(),
+          child: Homescreen(
+            size: size,
+            name: 'Fund Manager',
+            icon: FaIcon(FontAwesomeIcons.google), // login to enter in fundApp
+            name1: 'Continue with google',
+            onPressed: (){
+              print('3'*100);
+            Navigator.push(context, MaterialPageRoute(builder: (context) => Screen()));
+            },
+          ),
         ),
       ),
     );
@@ -47,12 +47,16 @@ class Homescreen extends StatelessWidget {
     Key? key,
     required this.size,
     required this.name,
+    required this.name1,
     required this.icon,
+    required this.onPressed,
   }) : super(key: key);
 
   final Size size;
   String name;
+  String name1;
   FaIcon icon;
+  final Function onPressed; // onpresed to navigate on other page
 
   @override
   Widget build(BuildContext context) {
@@ -65,11 +69,12 @@ class Homescreen extends StatelessWidget {
       // color: Color(0xFF12711),
       child: Center(
         child: Padding(
-          padding: EdgeInsets.only(top: size.width * 0.5),
+          padding: EdgeInsets.only(top: size.width * 0.65,left: size.width*0.01,right: size.width*0.01
+          ),
           child: Column(
             children: [
               Text(
-                'Fund Manager',
+                name,
                 style: TextStyle(
                     fontSize: size.width * 0.1,
                     fontWeight: FontWeight.bold,
@@ -78,21 +83,21 @@ class Homescreen extends StatelessWidget {
               Card(
                 color: Color(0xFF37373799),
                 margin: EdgeInsets.only(
-                    top: size.width * 0.2,
+                    top: size.width * 0.1,
                     bottom: size.width * 0.2,
-                    left: size.width * 0.05,
-                    right: size.width * 0.05),
+                    left: size.width * 0.02,
+                    right: size.width * 0.02),
                 child: Center(
                   child: GestureDetector(
                     onTap: () {
-                      print('ccc' * 100);
+                      onPressed(); //
                     },
                     child: Padding(
                       padding: EdgeInsets.all(size.width * 0.03),
                       child: Column(
                         children: [
                           icon,
-                          Text(name),
+                          Text(name1,style: TextStyle(color: Colors.white),),// name in gesturDectector 
                         ],
                       ),
                     ),

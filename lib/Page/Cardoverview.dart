@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fund_manger/Page/addfund.dart';
 import 'package:fund_manger/widgets/style.dart';
 
 class CardView extends StatelessWidget {
@@ -18,6 +19,27 @@ class CardView extends StatelessWidget {
     Size size = MediaQuery.of(context).size;
     return SafeArea(
       child: Scaffold(
+        appBar: AppBar(
+          elevation: 0,
+          flexibleSpace: Container(
+              width: size.width,
+              height: size.height,
+              decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                      begin: Alignment.topRight,
+                      end: Alignment.bottomRight,
+                      colors: [Color(0xFFF12711), Color(0xFFF12711)])),
+                      
+                  child: Padding(
+                    padding: EdgeInsets.only(right: size.width*0.9),
+                    child: GestureDetector(
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                        
+                      ),
+                  ),
+              ),),
         body: Container(
           width: size.width,
           decoration: BoxDecoration(
@@ -30,15 +52,7 @@ class CardView extends StatelessWidget {
               Row(
                 children: [
                   Padding(padding: EdgeInsets.only(left: 8, top: 5)),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                    child: Icon(
-                      Icons.chevron_left,
-                      size: size.height * 0.06,
-                    ),
-                  ),
+                  
                 ],
               ),
               Container(
@@ -94,7 +108,10 @@ class CardView extends StatelessWidget {
                     child: Icon(
                       Icons.share_rounded,
                       size: size.height * 0.06,
+                      
                     ),
+                    onTap: (){
+                    },
                   ),
                 ],
               ),
