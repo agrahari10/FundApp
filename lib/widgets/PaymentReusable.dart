@@ -26,7 +26,7 @@ class PaymentReusablecard extends StatelessWidget {
           child: Card(
             child: ListTile(
               title: Text(
-                'Rs.$amount',
+                'Rs. $amount',
                 style: cardItemTextStyle.copyWith(
                     color: Colors.black, fontSize: size.width * 0.05),
               ),

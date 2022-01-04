@@ -96,8 +96,7 @@ class _FundAvailableState extends State<FundAvailable> {
         ),
         floatingActionButton: FloatingActionButton.extended(
           onPressed: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context)=> Record()));
-
+            Navigator.push(context, MaterialPageRoute(builder: (context)=> Record()));
           },
           icon: Icon(
             Icons.add,
@@ -147,5 +146,3 @@ class _FundAvailableState extends State<FundAvailable> {
     );
   }
 }
-
-

@@ -1,7 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
+import 'package:fund_manger/Page/Cardoverview.dart';
+import 'package:fund_manger/Page/Record.dart';
+import 'package:fund_manger/Page/addfund.dart';
+import 'package:fund_manger/Page/funds.dart';
+import 'package:fund_manger/Page/memberOverview.dart';
+import 'package:fund_manger/Page/members.dart';
+import 'package:fund_manger/Page/paymentoverview.dart';
+import 'package:fund_manger/Page/screen.dart';
+import 'package:fund_manger/repository/authRepository.dart';
+
+
 import 'Page/screen.dart';
+
 void main() {
   runApp(MyApp());
 }
@@ -13,6 +25,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
         debugShowCheckedModeBanner: false, home: SafeArea(child: Home()));
+
   }
 }
 
@@ -88,6 +101,7 @@ class Homescreen extends StatelessWidget {
                     left: size.width * 0.02,
                     right: size.width * 0.02),
                 child: Center(
+
                   child: GestureDetector(
                     onTap: () {
                       onPressed(); //
