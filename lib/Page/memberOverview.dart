@@ -18,6 +18,17 @@ class MemeberOverview extends StatelessWidget {
     Size size = MediaQuery.of(context).size;
     return SafeArea(
       child: Scaffold(
+        appBar: AppBar(
+          elevation: 0,
+          flexibleSpace: Container(
+              width: size.width,
+              height: size.height,
+              decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                      begin: Alignment.topRight,
+                      end: Alignment.bottomRight,
+                      colors: [Color(0xFFF12711), Color(0xFFF12711)]))
+              ),),
         body: Container(
           width: size.width,
           decoration: BoxDecoration(

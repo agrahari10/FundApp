@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fund_manger/Page/addfund.dart';
 import 'package:fund_manger/widgets/style.dart';
 
 class Record extends StatefulWidget {
@@ -10,7 +11,7 @@ class Record extends StatefulWidget {
 
 class _RecordState extends State<Record> {
   // String _currText = '';
-  List<String> selectedList = [];
+  List<String> selectedList = []; // users consumers
   List<String> allUsers = [
     'Adarsh',
     'Osama',
@@ -37,10 +38,22 @@ class _RecordState extends State<Record> {
     Size size = MediaQuery.of(context).size;
     return SafeArea(
       child: Scaffold(
+        appBar: AppBar(
+          elevation: 0,
+          flexibleSpace: Container(
+            width: size.width,
+            height: size.height,
+            decoration: BoxDecoration(
+                gradient: LinearGradient(
+                    begin: Alignment.topRight,
+                    end: Alignment.bottomRight,
+                    colors: [Color(0xFFF12711), Color(0xFFF12711)])),
+          ),
+        ),
         body: SingleChildScrollView(
           child: Container(
             width: size.width,
-            height: size.height*1.1,
+            height: size.height,
             decoration: BoxDecoration(
                 gradient: LinearGradient(
                     begin: Alignment.topRight,
@@ -48,20 +61,6 @@ class _RecordState extends State<Record> {
                     colors: [Color(0xFFF12711), Color(0xFFF5AF19)])),
             child: Column(
               children: [
-                Row(
-                  children: [
-                    Padding(padding: EdgeInsets.only(left: 8, top: 5)),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                      child: Icon(
-                        Icons.chevron_left,
-                        size: size.height * 0.06,
-                      ),
-                    ),
-                  ],
-                ),
                 Container(
                   child: Text(
                     'Add Record',
@@ -84,7 +83,7 @@ class _RecordState extends State<Record> {
                         height: 30.0,
                       ),
                       TextField(
-                        obscureText: true,
+                        // obscureText: true,
                         decoration: InputDecoration(
                           filled: true,
                           fillColor: Colors.white,
@@ -92,14 +91,17 @@ class _RecordState extends State<Record> {
                             borderRadius:
                                 BorderRadius.circular(size.height * 0.01),
                           ),
-                          hintText: 'Item Name',
+                          hintText:
+                              'Item Name', // item name which is brought by user or consumer
                         ),
                       ),
                       SizedBox(
                         height: 20.0,
                       ),
                       TextField(
-                        obscureText: true,
+                        keyboardType: TextInputType.number,
+
+                        // obscureText: false,
                         decoration: InputDecoration(
                           filled: true,
                           fillColor: Colors.white,
@@ -107,14 +109,14 @@ class _RecordState extends State<Record> {
                             borderRadius:
                                 BorderRadius.circular(size.height * 0.01),
                           ),
-                          hintText: 'Amount',
+                          hintText: 'Amount', // amount to be added
                         ),
                       ),
                       SizedBox(
                         height: 20.0,
                       ),
                       TextField(
-                        obscureText: true,
+                        // obscureText: true,
                         decoration: InputDecoration(
                           filled: true,
                           fillColor: Colors.white,
@@ -152,6 +154,8 @@ class _RecordState extends State<Record> {
                                             selectedList.remove(allUsers[i]);
                                           else
                                             selectedList.add(allUsers[i]);
+
+                                          /// users which are going to consume
                                         });
                                       print(selectedList);
                                     },
@@ -176,15 +180,28 @@ class _RecordState extends State<Record> {
                             primary: Colors.white, // background
                             onPrimary: Colors.black, // foreground
                           ),
-                          onPressed: () {},
+                          onPressed: () {
+                          // details added by buyer e.g  consumers,amount,
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => AddFund()));
+                          },
                           child: Container(
-                            width: size.width*0.17,
-                            height: size.height*0.06,
+                            width: size.width * 0.17,
+                            height: size.height * 0.06,
                             child: Row(
                               children: [
                                 Icon(Icons.account_balance_wallet),
-                                SizedBox(width: 10.0,),
-                                Text('Add',style: cardItemTextStyle.copyWith(fontSize: 17,fontWeight: FontWeight.bold),),
+                                SizedBox(
+                                  width: 8.0,
+                                ),
+                                Text(
+                                  'Add',
+                                  style: cardItemTextStyle.copyWith(
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.bold),
+                                ),
                               ],
                             ),
                           ),

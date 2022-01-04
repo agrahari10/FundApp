@@ -7,22 +7,24 @@ class Reusablecard extends StatelessWidget {
     required this.item,
     required this.size,
     required this.amount,
+    required this.onPressed,
   }) : super(key: key);
 
   final String item;
   final Size size;
   final int amount;
+  final Function onPressed;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: size.height * 0.12,
+      height: size.height * 0.1,
       child: GestureDetector(
         onTap: () {
-          print('33' * 100);
+          onPressed();
         },
         child: Padding(
-          padding: const EdgeInsets.all(4.0),
+          padding:  EdgeInsets.only(top: size.width*0.01,left: size.width*0.0000000001,right: size.width*0.001),
           child: Card(
             child: ListTile(
               title: Text(
