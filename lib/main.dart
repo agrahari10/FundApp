@@ -7,6 +7,8 @@ import 'package:fund_manger/Page/funds.dart';
 import 'package:fund_manger/Page/memberOverview.dart';
 import 'package:fund_manger/Page/members.dart';
 import 'package:fund_manger/Page/paymentoverview.dart';
+import 'package:fund_manger/Page/screen.dart';
+import 'package:fund_manger/repository/authRepository.dart';
 
 void main() {
   runApp(MyApp());
@@ -17,8 +19,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        debugShowCheckedModeBanner: false, home: PaymentOverview());
+    return MaterialApp(debugShowCheckedModeBanner: false, home: Home());
   }
 }
 
@@ -84,18 +85,13 @@ class Homescreen extends StatelessWidget {
                     left: size.width * 0.05,
                     right: size.width * 0.05),
                 child: Center(
-                  child: GestureDetector(
-                    onTap: () {
-                      print('ccc' * 100);
-                    },
-                    child: Padding(
-                      padding: EdgeInsets.all(size.width * 0.03),
-                      child: Column(
-                        children: [
-                          icon,
-                          Text(name),
-                        ],
-                      ),
+                  child: Padding(
+                    padding: EdgeInsets.all(size.width * 0.03),
+                    child: Column(
+                      children: [
+                        icon,
+                        Text(name),
+                      ],
                     ),
                   ),
                 ),

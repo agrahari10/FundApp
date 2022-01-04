@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1046812512720",
+    "project_id": "fund-manager-project",
+    "storage_bucket": "fund-manager-project.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1046812512720:android:4a29953e1414d5af3ba9d5",
+        "android_client_info": {
+          "package_name": "com.example.fund_manger"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1046812512720-ltshf5u68q8r9rqs69s2v46b8dtacmmt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.fund_manger",
+            "certificate_hash": "406ca2db8c92ede57d6fbe59983abb943e688cb9"
+          }
+        },
+        {
+          "client_id": "1046812512720-h11j1fotjt5gspuifas9aad8olhcju4h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyARRoWM1xOweeXd8sK7-_kddbYuHaEWXwI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1046812512720-h11j1fotjt5gspuifas9aad8olhcju4h.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

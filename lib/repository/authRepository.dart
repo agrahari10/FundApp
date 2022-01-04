@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 enum AppState {
   initial,
@@ -74,35 +75,50 @@ class AuthRepository with ChangeNotifier {
     // }
   }
 
-  Future<dynamic> signup({
-    required String email,
-    required String password,
-    required String phoneNumber,
-    required String name,
-  }) async {
+  Future<dynamic> signup() async {
+    print("google signin");
     _appState = AppState.authenticating;
-    var user = await _auth.createUserWithEmailAndPassword(
-        email: email, password: password);
-    _appState = AppState.unauthorised;
 
-    await _firestore
-        .collection('users')
-        .doc(FirebaseAuth.instance.currentUser!.uid)
-        .set({
-      'name': name,
-      'email': email,
-      'uuid': FirebaseAuth.instance.currentUser!.uid,
-      'joinDate': Timestamp.now(),
-      'isRequestAccepted': 'pending', // pending, accepted, rejected
-      'isAdmin': false,
-    }).then((value) {
-      _appState = AppState.authenticated;
-      notifyListeners();
-    }).catchError((error) {
-      _appState = AppState.unauthenticated;
-      notifyListeners();
-      throw error;
-    });
+    final GoogleSignIn googleSignIn = GoogleSignIn();
+    final GoogleSignInAccount? googleSignInAccount =
+        await googleSignIn.signIn();
+    if (googleSignInAccount != null) {
+      print("google login in process");
+      final GoogleSignInAuthentication googleSignInAuthentication =
+          await googleSignInAccount.authentication;
+      final AuthCredential authCredential = GoogleAuthProvider.credential(
+          idToken: googleSignInAuthentication.idToken,
+          accessToken: googleSignInAuthentication.accessToken);
+
+      // Getting users credential
+      UserCredential result = await _auth.signInWithCredential(authCredential);
+      User? user = result.user;
+
+      if (user != null) {
+        print("google login in success");
+
+        _appState = AppState.unauthorised;
+
+        String? name = user.displayName;
+        String? email = user.email;
+        String uuid = user.uid;
+
+        await _firestore
+            .collection('users')
+            .doc(FirebaseAuth.instance.currentUser!.uid)
+            .set({
+          'name': name,
+          'email': email,
+          'uuid': uuid,
+          'joinDate': Timestamp.now().millisecondsSinceEpoch,
+          'isRequestAccepted': 'pending', // pending, accepted, rejected
+          'isAdmin': false,
+        });
+
+        notifyListeners();
+      } else
+        print("google login failed");
+    }
   }
 
   Future logout() async {
@@ -123,12 +139,9 @@ class AuthRepository with ChangeNotifier {
 
   Future<void> updateUserProfile({
     required String name,
-    required String phoneNumber,
-    required String address,
   }) async {
     _firestore.collection('users').doc(_firebaseAuth.currentUser!.uid).update({
       'name': name,
-      'address': address,
     });
   }
 }
