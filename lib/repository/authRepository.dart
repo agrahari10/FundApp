@@ -38,7 +38,23 @@ class AuthRepository with ChangeNotifier {
         print('logged In');
         _user = firebaseUser;
 
-        _appState = AppState.authenticated;
+        // check if authorized or unauthorized
+        _firestore
+            .collection("users")
+            .doc(_auth.currentUser!.uid)
+            .get()
+            .then((doc) {
+          var data = doc.data()!;
+          if (data['isRequestAccepted'] == 'accepted') {
+            _appState = AppState.authenticated;
+            notifyListeners();
+          } else {
+            _appState = AppState.unauthorised;
+            notifyListeners();
+          }
+        });
+
+        _appState = AppState.unauthorised;
         notifyListeners();
 
         // print('*' * 200);
@@ -75,7 +91,7 @@ class AuthRepository with ChangeNotifier {
     // }
   }
 
-  Future<dynamic> signup() async {
+  Future<dynamic> continueWithGoogle() async {
     print("google signin");
     _appState = AppState.authenticating;
 
@@ -103,17 +119,20 @@ class AuthRepository with ChangeNotifier {
         String? email = user.email;
         String uuid = user.uid;
 
-        await _firestore
+        var docRef = _firestore
             .collection('users')
-            .doc(FirebaseAuth.instance.currentUser!.uid)
-            .set({
-          'name': name,
-          'email': email,
-          'uuid': uuid,
-          'joinDate': Timestamp.now().millisecondsSinceEpoch,
-          'isRequestAccepted': 'pending', // pending, accepted, rejected
-          'isAdmin': false,
-        });
+            .doc(FirebaseAuth.instance.currentUser!.uid);
+
+        var getDoc = await docRef.get();
+        if (!getDoc.exists)
+          await docRef.set({
+            'name': name,
+            'email': email,
+            'uuid': uuid,
+            'joinDate': Timestamp.now().millisecondsSinceEpoch,
+            'isRequestAccepted': 'pending', // pending, accepted, rejected
+            'isAdmin': false,
+          });
 
         notifyListeners();
       } else

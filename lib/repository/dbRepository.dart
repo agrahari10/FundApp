@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:fund_manger/models/fundHistoryModel.dart';
+import 'package:fund_manger/models/userModel.dart';
 import 'package:uuid/uuid.dart';
 
 class DbRepository with ChangeNotifier {
@@ -40,8 +42,14 @@ class DbRepository with ChangeNotifier {
     // fetch the data of that particular transaction
     var snap =
         await _firestore.collection("fundAddHistory").doc(fundHistoryUid).get();
-    var data = snap.data()!;
-    String userId = data['userId'];
+    var data = snap.data();
+    String userId = data?['userId'];
+    double amountAdded = data?['amount'] ?? 0;
+
+    if (data?['status'] == "verified") {
+      print("payment already verified");
+      return Future.delayed(Duration.zero);
+    } // do nothing if already verifed
 
     //////// verify transaction and add the amount to the fund (in both global and user collection)
 
@@ -49,15 +57,18 @@ class DbRepository with ChangeNotifier {
     //// get fund amount
     _firestore.collection("fund").doc("fundAmount").get().then((doc) {
       double previousAmount = 0.0;
+      double amount = 0.0;
       // check if in case doesn't exist
       if (doc.exists) {
-        previousAmount = doc.data()!['totalFundAmount'];
+        previousAmount =
+            double.parse(doc.data()!['totalFundAmount'].toString());
+        amount =
+            data!['amount']; // data['amount'] is coming from user's collection
       }
 
       // add amount
       _firestore.collection("fund").doc("fundAmount").set({
-        "totalFundAmount": previousAmount +
-            data['amount'], // data['amount'] is coming from user's collection
+        "totalFundAmount": previousAmount + amount,
       });
     });
 
@@ -70,9 +81,10 @@ class DbRepository with ChangeNotifier {
         .get()
         .then((doc) {
       //// get the previous amount
-      double previousAmount = 0.0;
+      double previousAmount = 0;
       if (doc.exists) {
-        previousAmount = doc.data()!["totalFundAmount"];
+        previousAmount =
+            double.parse(doc.data()!["totalFundAmount"].toString());
       }
 
       //// add and store total amount
@@ -81,9 +93,9 @@ class DbRepository with ChangeNotifier {
           .doc(userId)
           .collection("fund")
           .doc("fundAmount")
-          .update({
-        "totalFundAmount": previousAmount + doc.data()!["totalFundAmount"],
-      });
+          .set({
+        "totalFundAmount": previousAmount + amountAdded,
+      }).then((value) => print((doc.data()?["totalFundAmount"] ?? 0)));
     });
 
     //// set status to "verified" from "pending"
@@ -135,7 +147,7 @@ class DbRepository with ChangeNotifier {
     //// substract the amount from global fund scope
     // get the global fund amount and data
     await _firestore.collection("fund").doc("fundAmount").get().then((doc) {
-      double previousAmount = 0.0;
+      double previousAmount = 0;
       // check if in case doesn't exist
       if (doc.exists) {
         previousAmount = doc.data()!['totalFundAmount'];
@@ -160,7 +172,7 @@ class DbRepository with ChangeNotifier {
           .get()
           .then((doc) {
         //// get the previous amount
-        double previousAmount = 0.0;
+        double previousAmount = 0;
         if (doc.exists) {
           previousAmount = doc.data()!["totalFundAmount"];
         }
@@ -173,10 +185,55 @@ class DbRepository with ChangeNotifier {
             .doc(consumerUid)
             .collection("fund")
             .doc("fundAmount")
-            .update({
+            .set({
           "totalFundAmount": previousAmount - perPersonAmountExpend,
         });
       });
     }
+  }
+
+  Future<UserModel> getUserDetails({required String uuid}) async {
+    var snap = await _firestore.collection("users").doc(uuid).get();
+    var data = snap.data()!;
+    return UserModel(
+      uuid: data['uuid'],
+      email: data['email'],
+      isAdmin: data['isAdmin'],
+      accountCreatedOn: data['joinDate'],
+      name: data['name'],
+    );
+  }
+
+  Future<FundHistoryModel> getFundHistoryDetails(
+      {required String fundHistoryUid}) async {
+    var snap =
+        await _firestore.collection("fundAddHistory").doc(fundHistoryUid).get();
+    var data = snap.data()!;
+
+    return FundHistoryModel(
+      fundAddHistoryUid: data['fundHistoryUid'],
+      addedByUid: data['userId'],
+      addedByUsername: data['name'],
+      timestamp: data['timestamp'],
+      amount: data['amount'],
+      paymentMethod: data['paymentMethod'],
+      status: data['status'],
+      comment: data['comment'],
+    );
+  }
+
+  Future<List<String>> getAuthorizedUsersIds() async {
+    List<String> uids = [];
+    await _firestore
+        .collection("users")
+        .where("isRequestAccepted", isEqualTo: "accepted")
+        .get()
+        .then((docs) {
+      docs.docs.forEach((doc) {
+        uids.add(doc.id);
+      });
+    });
+
+    return uids;
   }
 }

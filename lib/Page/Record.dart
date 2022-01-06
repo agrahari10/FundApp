@@ -1,5 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:fund_manger/Page/addfund.dart';
+import 'package:fund_manger/models/userModel.dart';
+import 'package:fund_manger/repository/dbRepository.dart';
 import 'package:fund_manger/widgets/style.dart';
 
 class Record extends StatefulWidget {
@@ -10,31 +12,43 @@ class Record extends StatefulWidget {
 }
 
 class _RecordState extends State<Record> {
-  // String _currText = '';
-  List<String> selectedList = []; // users consumers
-  List<String> allUsers = [
-    'Adarsh',
-    'Osama',
-    'Avinash',
-    'Rupesh',
-    'Babunandan',
-    'Malik'
-  ];
+  List<Map> selectedList = []; // users consumers
+  List<Map> allUsers = [];
 
-  // void select(bool isChecked, index){
-  //   // ignore: unnecessary_statements
-  //   if  (isChecked == true){
-  //     setState((){
-  //       unselected.add(selected[index]);
-  //       });
-  //   if (isChecked == false){
-  //     unselected.remove(selected[index]);
-  //   }
-  //   }
-  // }
+  String itemName = "";
+  double amount = 0;
+  String comment = "";
+
+  bool isDataLoaded = false;
+
+  late UserModel currentUser;
+
+  String currentUserId = FirebaseAuth.instance.currentUser!.uid;
 
   @override
   Widget build(BuildContext context) {
+    if (!isDataLoaded) {
+      DbRepository().getAuthorizedUsersIds().then((uids) {
+        print(uids);
+        uids.forEach((uid) {
+          DbRepository().getUserDetails(uuid: uid).then((data) {
+            print(data.name);
+            if (mounted)
+              setState(() {
+                allUsers.add({"name": data.name, "uuid": data.uuid});
+              });
+          });
+        });
+      });
+
+      if (mounted)
+        setState(() {
+          DbRepository().getUserDetails(uuid: currentUserId).then((user) {
+            currentUser = user;
+            isDataLoaded = true;
+          });
+        });
+    }
     Size size = MediaQuery.of(context).size;
     return SafeArea(
       child: Scaffold(
@@ -59,159 +73,190 @@ class _RecordState extends State<Record> {
                     begin: Alignment.topRight,
                     end: Alignment.bottomRight,
                     colors: [Color(0xFFF12711), Color(0xFFF5AF19)])),
-            child: Column(
-              children: [
-                Container(
-                  child: Text(
-                    'Add Record',
-                    style: cardItemTextStyle.copyWith(
-                      fontSize: size.width * 0.08,
-                      color: Color(0xffFFFFFF),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.all(size.height * 0.02),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            child: isDataLoaded
+                ? Column(
                     children: [
-                      Divider(
-                        color: Colors.white,
-                        thickness: 1,
-                      ),
-                      SizedBox(
-                        height: 30.0,
-                      ),
-                      TextField(
-                        // obscureText: true,
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.circular(size.height * 0.01),
+                      Container(
+                        child: Text(
+                          'Add Record',
+                          style: cardItemTextStyle.copyWith(
+                            fontSize: size.width * 0.08,
+                            color: Color(0xffFFFFFF),
                           ),
-                          hintText:
-                              'Item Name', // item name which is brought by user or consumer
                         ),
                       ),
-                      SizedBox(
-                        height: 20.0,
-                      ),
-                      TextField(
-                        keyboardType: TextInputType.number,
-
-                        // obscureText: false,
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.circular(size.height * 0.01),
-                          ),
-                          hintText: 'Amount', // amount to be added
-                        ),
-                      ),
-                      SizedBox(
-                        height: 20.0,
-                      ),
-                      TextField(
-                        // obscureText: true,
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.circular(size.height * 0.01),
-                          ),
-                          hintText: 'Comment (Optinal)',
-                        ),
-                      ),
-                      SizedBox(
-                        height: 20.0,
-                      ),
-                      Text(
-                        'Consumers',
-                        style: cardItemTextStyle.copyWith(
-                            color: Colors.white,
-                            fontSize: size.height * 0.04,
-                            fontWeight: FontWeight.normal),
-                      ),
-                      Column(
-                        children: [
-                          for (int i = 0; i < allUsers.length; i++)
-                            Row(
+                      Padding(
+                        padding: EdgeInsets.all(size.height * 0.02),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Divider(
+                              color: Colors.white,
+                              thickness: 1,
+                            ),
+                            SizedBox(
+                              height: 30.0,
+                            ),
+                            TextField(
+                              onChanged: (value) {
+                                itemName = value;
+                              },
+                              decoration: InputDecoration(
+                                filled: true,
+                                fillColor: Colors.white,
+                                border: OutlineInputBorder(
+                                  borderRadius:
+                                      BorderRadius.circular(size.height * 0.01),
+                                ),
+                                hintText:
+                                    'Item Name', // item name which is brought by user or consumer
+                              ),
+                            ),
+                            SizedBox(
+                              height: 20.0,
+                            ),
+                            TextField(
+                              keyboardType: TextInputType.number,
+                              onChanged: (value) {
+                                amount = double.parse(value);
+                              },
+                              // obscureText: false,
+                              decoration: InputDecoration(
+                                filled: true,
+                                fillColor: Colors.white,
+                                border: OutlineInputBorder(
+                                  borderRadius:
+                                      BorderRadius.circular(size.height * 0.01),
+                                ),
+                                hintText: 'Amount', // amount to be added
+                              ),
+                            ),
+                            SizedBox(
+                              height: 20.0,
+                            ),
+                            TextField(
+                              onChanged: (value) {
+                                comment = value;
+                              },
+                              decoration: InputDecoration(
+                                filled: true,
+                                fillColor: Colors.white,
+                                border: OutlineInputBorder(
+                                  borderRadius:
+                                      BorderRadius.circular(size.height * 0.01),
+                                ),
+                                hintText: 'Comment (Optinal)',
+                              ),
+                            ),
+                            SizedBox(
+                              height: 20.0,
+                            ),
+                            Text(
+                              'Consumers',
+                              style: cardItemTextStyle.copyWith(
+                                  color: Colors.white,
+                                  fontSize: size.height * 0.04,
+                                  fontWeight: FontWeight.normal),
+                            ),
+                            Column(
                               children: [
-                                SizedBox(
-                                  height: size.height * 0.05,
-                                  width: 200,
-                                  child: CheckboxListTile(
-                                    onChanged: (value) {
-                                      if (mounted)
-                                        setState(() {
-                                          if (selectedList
-                                              .contains(allUsers[i]))
-                                            selectedList.remove(allUsers[i]);
-                                          else
-                                            selectedList.add(allUsers[i]);
+                                for (int i = 0; i < allUsers.length; i++)
+                                  Row(
+                                    children: [
+                                      SizedBox(
+                                        height: size.height * 0.05,
+                                        width: 200,
+                                        child: CheckboxListTile(
+                                          onChanged: (value) {
+                                            if (mounted)
+                                              setState(() {
+                                                if (selectedList
+                                                    .contains(allUsers[i]))
+                                                  selectedList
+                                                      .remove(allUsers[i]);
+                                                else
+                                                  selectedList.add(allUsers[i]);
 
-                                          /// users which are going to consume
-                                        });
-                                      print(selectedList);
-                                    },
-                                    title: Text(
-                                      allUsers[i],
-                                      style: cardItemTextStyle.copyWith(
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    value: selectedList.contains(allUsers[i]),
+                                                /// users which are going to consume
+                                              });
+                                            print(selectedList);
+                                          },
+                                          title: Text(
+                                            allUsers[i]['name'],
+                                            style: cardItemTextStyle.copyWith(
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          value: selectedList
+                                              .contains(allUsers[i]),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                              ],
+                            ),
+                            SizedBox(
+                              height: 20.0,
+                            ),
+                            Center(
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  primary: Colors.white, // background
+                                  onPrimary: Colors.black, // foreground
+                                ),
+                                onPressed: () {
+                                  // details added by buyer e.g  consumers,amount,
+
+                                  List<String> consumersUids = [];
+                                  selectedList.forEach((user) {
+                                    consumersUids.add(user['uuid']);
+                                  });
+
+                                  DbRepository()
+                                      .addRecord(
+                                        itemName: itemName,
+                                        amount: amount,
+                                        recordedByUid: currentUser.uuid,
+                                        consumersUids: consumersUids,
+                                        comment: comment,
+                                      )
+                                      .then(
+                                        (value) => Navigator.of(context).pop(),
+                                      );
+
+                                  // .addFund(
+                                  //   amount: 50,
+                                  //   userId: FirebaseAuth.instance.currentUser!.uid,
+                                  //   userName: "M.K. Malik",
+                                  //   paymentMethod: "UPI",
+                                  //   comment: "Water",
+                                  // );
+                                },
+                                child: Container(
+                                  width: size.width * 0.17,
+                                  height: size.height * 0.06,
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.account_balance_wallet),
+                                      SizedBox(
+                                        width: 8.0,
+                                      ),
+                                      Text(
+                                        'Add',
+                                        style: cardItemTextStyle.copyWith(
+                                            fontSize: 17,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                              ],
-                            ),
-                        ],
-                      ),
-                      SizedBox(
-                        height: 20.0,
-                      ),
-                      Center(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            primary: Colors.white, // background
-                            onPrimary: Colors.black, // foreground
-                          ),
-                          onPressed: () {
-                          // details added by buyer e.g  consumers,amount,
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => AddFund()));
-                          },
-                          child: Container(
-                            width: size.width * 0.17,
-                            height: size.height * 0.06,
-                            child: Row(
-                              children: [
-                                Icon(Icons.account_balance_wallet),
-                                SizedBox(
-                                  width: 8.0,
-                                ),
-                                Text(
-                                  'Add',
-                                  style: cardItemTextStyle.copyWith(
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ],
-                            ),
-                          ),
+                              ),
+                            )
+                          ],
                         ),
-                      )
+                      ),
                     ],
-                  ),
-                ),
-              ],
-            ),
+                  )
+                : Center(child: CircularProgressIndicator()),
           ),
         ),
       ),

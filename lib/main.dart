@@ -1,21 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-
-import 'package:fund_manger/Page/Cardoverview.dart';
-import 'package:fund_manger/Page/Record.dart';
-import 'package:fund_manger/Page/addfund.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:fund_manger/Page/funds.dart';
-import 'package:fund_manger/Page/memberOverview.dart';
-import 'package:fund_manger/Page/members.dart';
-import 'package:fund_manger/Page/paymentoverview.dart';
 import 'package:fund_manger/Page/screen.dart';
 import 'package:fund_manger/repository/authRepository.dart';
+import 'package:fund_manger/repository/dbRepository.dart';
+import 'package:provider/provider.dart';
 
-
-import 'Page/screen.dart';
-
-void main() {
-  runApp(MyApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  SystemChrome.setPreferredOrientations(
+    [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown],
+  );
+  runApp(
+    MultiProvider(
+      child: MyApp(),
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => AuthRepository(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => DbRepository(),
+        ),
+      ],
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -24,8 +35,21 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        debugShowCheckedModeBanner: false, home: SafeArea(child: Home()));
+        debugShowCheckedModeBanner: false,
+        home: SafeArea(child: _showScreen(context)));
+  }
+}
 
+Widget _showScreen(BuildContext context) {
+  switch (context.watch<AuthRepository>().appState) {
+    case AppState.initial:
+    case AppState.unauthenticated:
+    case AppState.authenticating:
+      return Home();
+    case AppState.unauthorised:
+      return UnauthorizedPage();
+    case AppState.authenticated:
+      return FundAvailable();
   }
 }
 
@@ -44,9 +68,10 @@ class Home extends StatelessWidget {
             name: 'Fund Manager',
             icon: FaIcon(FontAwesomeIcons.google), // login to enter in fundApp
             name1: 'Continue with google',
-            onPressed: (){
-              print('3'*100);
-            Navigator.push(context, MaterialPageRoute(builder: (context) => Screen()));
+            onPressed: () async {
+              await AuthRepository().continueWithGoogle();
+              // Navigator.push(
+              //     context, MaterialPageRoute(builder: (context) => Screen()));
             },
           ),
         ),
@@ -82,8 +107,10 @@ class Homescreen extends StatelessWidget {
       // color: Color(0xFF12711),
       child: Center(
         child: Padding(
-          padding: EdgeInsets.only(top: size.width * 0.65,left: size.width*0.01,right: size.width*0.01
-          ),
+          padding: EdgeInsets.only(
+              top: size.width * 0.65,
+              left: size.width * 0.01,
+              right: size.width * 0.01),
           child: Column(
             children: [
               Text(
@@ -101,7 +128,6 @@ class Homescreen extends StatelessWidget {
                     left: size.width * 0.02,
                     right: size.width * 0.02),
                 child: Center(
-
                   child: GestureDetector(
                     onTap: () {
                       onPressed(); //
@@ -111,7 +137,10 @@ class Homescreen extends StatelessWidget {
                       child: Column(
                         children: [
                           icon,
-                          Text(name1,style: TextStyle(color: Colors.white),),// name in gesturDectector 
+                          Text(
+                            name1,
+                            style: TextStyle(color: Colors.white),
+                          ), // name in gesturDectector
                         ],
                       ),
                     ),

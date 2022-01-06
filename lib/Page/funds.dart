@@ -1,12 +1,8 @@
-import 'dart:typed_data';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fund_manger/Page/Record.dart';
 import 'package:fund_manger/Page/addfund.dart';
-import 'package:fund_manger/Page/memberOverview.dart';
 import 'package:fund_manger/Page/members.dart';
-import 'package:fund_manger/Page/paymentoverview.dart';
+import 'package:fund_manger/repository/authRepository.dart';
 import 'package:fund_manger/widgets/Reusable.dart';
 import 'package:fund_manger/widgets/style.dart';
 
@@ -37,8 +33,8 @@ class _FundAvailableState extends State<FundAvailable> {
                   gradient: LinearGradient(
                       begin: Alignment.topRight,
                       end: Alignment.bottomRight,
-                      colors: [Color(0xFFF12711), Color(0xFFF12711)]))
-              ),),
+                      colors: [Color(0xFFF12711), Color(0xFFF12711)]))),
+        ),
         body: SingleChildScrollView(
           child: Container(
             width: size.width,
@@ -80,10 +76,18 @@ class _FundAvailableState extends State<FundAvailable> {
                           children: [
                             for (int i = 0; i <= 6; i++)
                               Reusablecard(
-                                  item: item, size: size, amount: amount,
-                                  onPressed: (){
-                                    Navigator.push(context, MaterialPageRoute(builder: (context) => CardView()));
-                                  },),
+                                item: item,
+                                size: size,
+                                amount: amount,
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => CardView(),
+                                    ),
+                                  );
+                                },
+                              ),
                           ],
                         ),
                       ),
@@ -95,8 +99,10 @@ class _FundAvailableState extends State<FundAvailable> {
           ),
         ),
         floatingActionButton: FloatingActionButton.extended(
-          onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context)=> Record()));
+          onPressed: () async {
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => Record(),
+            ));
           },
           icon: Icon(
             Icons.add,
@@ -136,7 +142,8 @@ class _FundAvailableState extends State<FundAvailable> {
                 leading: Icon(Icons.people),
                 title: Text("Memebers"),
                 onTap: () {
-                  Navigator.push(context,MaterialPageRoute(builder: (context)=> Members()));
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => Members()));
                 },
               )
             ],
