@@ -118,12 +118,20 @@ class DbRepository with ChangeNotifier {
     String comment = "",
     required String
         recordedByUid, // the person who recorded / added / proceeded the transaction
+    required String
+        recordedBy, // name of the person who recorded / added / proceeded the transaction
     required List<String>
         consumersUids, // TODO: check if user request is accepted before adding his/her uid here
   }) async {
     var recordUid = Uuid().v4();
     int timestamp = DateTime.now().millisecondsSinceEpoch;
     // record transactions (buying transactions) history and details (in global scope)
+
+    List<String> consumerNames = [];
+    for (int i = 0; i < consumersUids.length; i++) {
+      UserModel user = await getUserDetails(uuid: consumersUids[i]);
+      consumerNames.add(user.name);
+    }
     var data = {
       "recordUid": recordUid, // refernce uid of the transactions
       "itemName": itemName,
@@ -131,7 +139,9 @@ class DbRepository with ChangeNotifier {
       "comment": comment,
       "recordedByUid":
           recordedByUid, // the person who recorded / added / proceeded the transaction
+      "recordedBy": recordedBy,
       "consumersUids": consumersUids, // list of uids of consumers
+      "consumerNames": consumerNames, // list of names of consumers
       "timestamp": timestamp, // in millisecondsSinceEpoch
     };
     await _firestore.collection("transactions").doc(recordUid).set(data);
@@ -195,12 +205,15 @@ class DbRepository with ChangeNotifier {
   Future<UserModel> getUserDetails({required String uuid}) async {
     var snap = await _firestore.collection("users").doc(uuid).get();
     var data = snap.data()!;
+
+    var userFundAmount = await getUserFundAmount(uuid: uuid);
     return UserModel(
       uuid: data['uuid'],
       email: data['email'],
       isAdmin: data['isAdmin'],
       accountCreatedOn: data['joinDate'],
       name: data['name'],
+      fundAmount: userFundAmount,
     );
   }
 
@@ -235,5 +248,43 @@ class DbRepository with ChangeNotifier {
     });
 
     return uids;
+  }
+
+  Future<List<UserModel>> getAuthorizedUsers() async {
+    List<UserModel> users = [];
+    List<String> uids = await getAuthorizedUsersIds();
+    for (String uid in uids) {
+      UserModel user = await getUserDetails(uuid: uid);
+      users.add(user);
+    }
+
+    print("# " * 10);
+    print(users);
+    print("# " * 10);
+
+    return users;
+  }
+
+  Stream<dynamic> getAvailableFundStream() {
+    return _firestore.collection("fund").snapshots();
+  }
+
+  Future<double> getUserFundAmount({required String uuid}) async {
+    var doc = await _firestore
+        .collection("users")
+        .doc(uuid)
+        .collection("fund")
+        .doc("fundAmount")
+        .get();
+
+    if (!doc.exists) return 0.0;
+    var snap = await _firestore
+        .collection("users")
+        .doc(uuid)
+        .collection("fund")
+        .doc("fundAmount")
+        .get();
+    var data = snap.data()!;
+    return data['totalFundAmount'];
   }
 }

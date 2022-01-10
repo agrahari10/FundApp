@@ -12,7 +12,7 @@ class Reusablecard extends StatelessWidget {
 
   final String item;
   final Size size;
-  final int amount;
+  final double amount;
   final Function onPressed;
 
   @override
@@ -24,7 +24,10 @@ class Reusablecard extends StatelessWidget {
           onPressed();
         },
         child: Padding(
-          padding:  EdgeInsets.only(top: size.width*0.01,left: size.width*0.0000000001,right: size.width*0.001),
+          padding: EdgeInsets.only(
+              top: size.width * 0.01,
+              left: size.width * 0.0000000001,
+              right: size.width * 0.001),
           child: Card(
             child: ListTile(
               title: Text(

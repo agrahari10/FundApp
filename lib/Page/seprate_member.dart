@@ -4,7 +4,7 @@ import 'package:fund_manger/widgets/Reusable.dart';
 import 'package:fund_manger/widgets/style.dart';
 
 class SeprateMember extends StatefulWidget {
-  const SeprateMember({ Key? key }) : super(key: key);
+  const SeprateMember({Key? key}) : super(key: key);
 
   @override
   _SeprateMemberState createState() => _SeprateMemberState();
@@ -25,8 +25,8 @@ class _SeprateMemberState extends State<SeprateMember> {
                   gradient: LinearGradient(
                       begin: Alignment.topRight,
                       end: Alignment.bottomRight,
-                      colors: [Color(0xFFF12711), Color(0xFFF12711)]))
-              ),),
+                      colors: [Color(0xFFF12711), Color(0xFFF12711)]))),
+        ),
         body: SingleChildScrollView(
           child: Container(
             width: size.width,
@@ -68,10 +68,13 @@ class _SeprateMemberState extends State<SeprateMember> {
                           children: [
                             for (int i = 0; i <= 6; i++)
                               Reusablecard(
-                                  item: 'dcdd', size: size, amount: 1222,
-                                  onPressed: (){
-                                    Navigator.push(context, MaterialPageRoute(builder: (context) => CardView()));
-                                  },),
+                                item: 'dcdd',
+                                size: size,
+                                amount: 1222,
+                                onPressed: () {
+                                  // Navigator.push(context, MaterialPageRoute(builder: (context) => CardView()));
+                                },
+                              ),
                           ],
                         ),
                       ),
@@ -82,6 +85,7 @@ class _SeprateMemberState extends State<SeprateMember> {
             ),
           ),
         ),
-      ),);
+      ),
+    );
   }
 }

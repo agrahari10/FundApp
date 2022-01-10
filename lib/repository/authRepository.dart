@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fund_manger/globleVariables.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 enum AppState {
@@ -47,6 +48,8 @@ class AuthRepository with ChangeNotifier {
           var data = doc.data()!;
           if (data['isRequestAccepted'] == 'accepted') {
             _appState = AppState.authenticated;
+            isCurrentUserAdmin = data['isAdmin'];
+            print("isAdmin $isCurrentUserAdmin");
             notifyListeners();
           } else {
             _appState = AppState.unauthorised;
@@ -124,6 +127,8 @@ class AuthRepository with ChangeNotifier {
             .doc(FirebaseAuth.instance.currentUser!.uid);
 
         var getDoc = await docRef.get();
+        // if doc already exist (user already added in firestore), don't overwrite data
+        // only write data if user is first time signing up
         if (!getDoc.exists)
           await docRef.set({
             'name': name,

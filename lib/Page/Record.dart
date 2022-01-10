@@ -13,7 +13,7 @@ class Record extends StatefulWidget {
 
 class _RecordState extends State<Record> {
   List<Map> selectedList = []; // users consumers
-  List<Map> allUsers = [];
+  List<Map> allUsers = []; // Map List {"name": name, "uuid": uuid}
 
   String itemName = "";
   double amount = 0;
@@ -25,20 +25,31 @@ class _RecordState extends State<Record> {
 
   String currentUserId = FirebaseAuth.instance.currentUser!.uid;
 
+  final DbRepository _dbRepository = DbRepository();
+
   @override
   Widget build(BuildContext context) {
     if (!isDataLoaded) {
-      DbRepository().getAuthorizedUsersIds().then((uids) {
-        print(uids);
-        uids.forEach((uid) {
-          DbRepository().getUserDetails(uuid: uid).then((data) {
-            print(data.name);
-            if (mounted)
-              setState(() {
-                allUsers.add({"name": data.name, "uuid": data.uuid});
-              });
-          });
-        });
+      // DbRepository().getAuthorizedUsersIds().then((uids) {
+      //   print(uids);
+      //   uids.forEach((uid) {
+      //     DbRepository().getUserDetails(uuid: uid).then((data) {
+      //       print(data.name);
+      //       if (mounted)
+      //         setState(() {
+      //           allUsers.add({"name": data.name, "uuid": data.uuid});
+      //         });
+      //     });
+      //   });
+      // });
+
+      _dbRepository.getAuthorizedUsers().then((users) {
+        for (UserModel user in users) {
+          if (mounted)
+            setState(() {
+              allUsers.add({"name": user.name, "uuid": user.uuid});
+            });
+        }
       });
 
       if (mounted)
@@ -58,10 +69,12 @@ class _RecordState extends State<Record> {
             width: size.width,
             height: size.height,
             decoration: BoxDecoration(
-                gradient: LinearGradient(
-                    begin: Alignment.topRight,
-                    end: Alignment.bottomRight,
-                    colors: [Color(0xFFF12711), Color(0xFFF12711)])),
+              gradient: LinearGradient(
+                begin: Alignment.topRight,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFFF12711), Color(0xFFF12711)],
+              ),
+            ),
           ),
         ),
         body: SingleChildScrollView(
@@ -203,13 +216,18 @@ class _RecordState extends State<Record> {
                                   primary: Colors.white, // background
                                   onPrimary: Colors.black, // foreground
                                 ),
-                                onPressed: () {
+                                onPressed: () async {
                                   // details added by buyer e.g  consumers,amount,
 
                                   List<String> consumersUids = [];
                                   selectedList.forEach((user) {
                                     consumersUids.add(user['uuid']);
                                   });
+
+                                  UserModel currentUser = await DbRepository()
+                                      .getUserDetails(
+                                          uuid: FirebaseAuth
+                                              .instance.currentUser!.uid);
 
                                   DbRepository()
                                       .addRecord(
@@ -218,6 +236,7 @@ class _RecordState extends State<Record> {
                                         recordedByUid: currentUser.uuid,
                                         consumersUids: consumersUids,
                                         comment: comment,
+                                        recordedBy: currentUser.name,
                                       )
                                       .then(
                                         (value) => Navigator.of(context).pop(),
