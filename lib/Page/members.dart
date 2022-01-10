@@ -38,9 +38,10 @@ class _MembersState extends State<Members> {
           }
         }
 
-        _dbRepo.getUserFundAmount(uuid: currentUserId).then((amount) {
-          balance = amount;
-        });
+        // _dbRepo.getUserFundAmount(uuid: currentUserId).then((amount) {
+        //   balance = amount;
+        // });
+        balance = currentUser.fundAmount;
 
         if (mounted)
           setState(() {
