@@ -1,20 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:fund_manger/Page/addfund.dart';
+import 'package:fund_manger/repository/dbRepository.dart';
 import 'package:fund_manger/widgets/style.dart';
 
-class CardView extends StatelessWidget {
-  const CardView({Key? key}) : super(key: key);
+class CardView extends StatefulWidget {
+  final String item;
+  final double amount;
+  final List<dynamic> consumersList;
+  final List<dynamic> consumerNames;
+  final DateTime dateTime;
+  final String comment;
+  final String recordedBy;
+  const CardView({
+    required this.item,
+    required this.amount,
+    required this.consumersList,
+    required this.consumerNames,
+    required this.dateTime,
+    required this.comment,
+    required this.recordedBy,
+  });
 
   @override
-  Widget build(BuildContext context) {
-    String item = 'Sabzi';
-    double amount = 100;
+  State<CardView> createState() => _CardViewState();
+}
 
-    String date = "06 November 2021";
-    String time = "20:10";
-    String recordedBy = "Avinash";
-    String consumer = "Avinash, Adarsh, Osama";
-    String comment = "Comment if any (Optional)";
+class _CardViewState extends State<CardView> {
+  @override
+  Widget build(BuildContext context) {
+    String consumersStr = "";
+
+    for (String consumerName in widget.consumerNames) {
+      consumersStr += consumerName + "\n";
+    }
+
+    String date =
+        "${widget.dateTime.day} / ${widget.dateTime.month} / ${widget.dateTime.year}";
+    String time = "${widget.dateTime.hour}:${widget.dateTime.minute}";
 
     Size size = MediaQuery.of(context).size;
     return SafeArea(
@@ -22,24 +44,23 @@ class CardView extends StatelessWidget {
         appBar: AppBar(
           elevation: 0,
           flexibleSpace: Container(
-              width: size.width,
-              height: size.height,
-              decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                      begin: Alignment.topRight,
-                      end: Alignment.bottomRight,
-                      colors: [Color(0xFFF12711), Color(0xFFF12711)])),
-                      
-                  child: Padding(
-                    padding: EdgeInsets.only(right: size.width*0.9),
-                    child: GestureDetector(
-                        onTap: () {
-                          Navigator.pop(context);
-                        },
-                        
-                      ),
-                  ),
-              ),),
+            width: size.width,
+            height: size.height,
+            decoration: BoxDecoration(
+                gradient: LinearGradient(
+                    begin: Alignment.topRight,
+                    end: Alignment.bottomRight,
+                    colors: [Color(0xFFF12711), Color(0xFFF12711)])),
+            child: Padding(
+              padding: EdgeInsets.only(right: size.width * 0.9),
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ),
+          ),
+        ),
         body: Container(
           width: size.width,
           decoration: BoxDecoration(
@@ -52,12 +73,11 @@ class CardView extends StatelessWidget {
               Row(
                 children: [
                   Padding(padding: EdgeInsets.only(left: 8, top: 5)),
-                  
                 ],
               ),
               Container(
                 child: Text(
-                  '$item',
+                  '${widget.item}',
                   style: cardItemTextStyle.copyWith(
                     fontSize: size.width * 0.07,
                     color: Color(0xffFFFFFF),
@@ -65,7 +85,7 @@ class CardView extends StatelessWidget {
                 ),
               ),
               Container(
-                child: Text('Rs. $amount',
+                child: Text('Rs. ${widget.amount}',
                     style: cardItemTextStyle.copyWith(
                       fontSize: size.width * 0.05,
                       color: Color(0xffFFFFFF),
@@ -95,7 +115,7 @@ class CardView extends StatelessWidget {
                         Padding(
                           padding: EdgeInsets.all(size.width * 0.05),
                           child: Text(
-                            'Date: $date\n\nTime: $time\n\nRecorded by: $recordedBy\n\nConsumer:\n$consumer\n\nComment$comment',
+                            'Date: $date\n\nTime: $time\n\nRecorded by: ${widget.recordedBy}\n\nConsumer:\n$consumersStr\nComment: ${widget.comment}',
                             style: cardItemTextStyle.copyWith(
                                 fontSize: size.width * 0.05,
                                 color: Colors.white),
@@ -108,10 +128,8 @@ class CardView extends StatelessWidget {
                     child: Icon(
                       Icons.share_rounded,
                       size: size.height * 0.06,
-                      
                     ),
-                    onTap: (){
-                    },
+                    onTap: () {},
                   ),
                 ],
               ),

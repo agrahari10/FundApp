@@ -1,13 +1,12 @@
-import 'dart:typed_data';
-
-import 'package:flutter/foundation.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fund_manger/Page/Record.dart';
 import 'package:fund_manger/Page/addfund.dart';
-import 'package:fund_manger/Page/memberOverview.dart';
 import 'package:fund_manger/Page/members.dart';
-import 'package:fund_manger/Page/paymentoverview.dart';
+import 'package:fund_manger/repository/authRepository.dart';
+import 'package:fund_manger/repository/dbRepository.dart';
 import 'package:fund_manger/widgets/Reusable.dart';
+import 'package:fund_manger/widgets/drawer.dart';
 import 'package:fund_manger/widgets/style.dart';
 
 import 'Cardoverview.dart';
@@ -37,8 +36,8 @@ class _FundAvailableState extends State<FundAvailable> {
                   gradient: LinearGradient(
                       begin: Alignment.topRight,
                       end: Alignment.bottomRight,
-                      colors: [Color(0xFFF12711), Color(0xFFF12711)]))
-              ),),
+                      colors: [Color(0xFFF12711), Color(0xFFF12711)]))),
+        ),
         body: SingleChildScrollView(
           child: Container(
             width: size.width,
@@ -64,11 +63,29 @@ class _FundAvailableState extends State<FundAvailable> {
                         ),
                       ),
                       Container(
-                        child: Text('Rs.$balance',
-                            style: cardItemTextStyle.copyWith(
-                              fontSize: size.width * 0.1,
-                              color: Color(0xffFFFFFF),
-                            )),
+                        child: StreamBuilder(
+                          initialData: 0,
+                          stream: DbRepository().getAvailableFundStream(),
+                          builder: (context, AsyncSnapshot snapshot) {
+                            if (snapshot.connectionState !=
+                                    ConnectionState.active ||
+                                snapshot.error != null ||
+                                snapshot.data == null ||
+                                !snapshot.hasData)
+                              return CircularProgressIndicator();
+                            else {
+                              var data = snapshot.data.docs[0];
+
+                              print("* " * 20);
+                              print(data);
+                              return Text('Rs. ${data['totalFundAmount']}',
+                                  style: cardItemTextStyle.copyWith(
+                                    fontSize: size.width * 0.1,
+                                    color: Color(0xffFFFFFF),
+                                  ));
+                            }
+                          },
+                        ),
                       ),
                       Divider(
                         color: Colors.white,
@@ -78,12 +95,51 @@ class _FundAvailableState extends State<FundAvailable> {
                         padding: const EdgeInsets.only(top: 50),
                         child: Column(
                           children: [
-                            for (int i = 0; i <= 6; i++)
-                              Reusablecard(
-                                  item: item, size: size, amount: amount,
-                                  onPressed: (){
-                                    Navigator.push(context, MaterialPageRoute(builder: (context) => CardView()));
-                                  },),
+                            StreamBuilder(
+                              stream: FirebaseFirestore.instance
+                                  .collection("transactions")
+                                  .orderBy("timestamp", descending: true)
+                                  .snapshots(),
+                              builder: (context, AsyncSnapshot snapshot) {
+                                if (snapshot.data == null)
+                                  return CircularProgressIndicator();
+
+                                return SizedBox(
+                                  height: size.height * 0.7,
+                                  child: ListView.builder(
+                                    itemCount: snapshot.data.docs.length,
+                                    itemBuilder: (context, index) {
+                                      var data = snapshot.data.docs[index];
+                                      return Reusablecard(
+                                        item: data['itemName'],
+                                        size: size,
+                                        amount: data['amount'],
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => CardView(
+                                                amount: data['amount'],
+                                                comment: data['comment'],
+                                                consumersList:
+                                                    data['consumersUids'],
+                                                consumerNames:
+                                                    data['consumerNames'],
+                                                dateTime: DateTime
+                                                    .fromMillisecondsSinceEpoch(
+                                                        data['timestamp']),
+                                                item: data['itemName'],
+                                                recordedBy: data['recordedBy'],
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      );
+                                    },
+                                  ),
+                                );
+                              },
+                            ),
                           ],
                         ),
                       ),
@@ -95,8 +151,10 @@ class _FundAvailableState extends State<FundAvailable> {
           ),
         ),
         floatingActionButton: FloatingActionButton.extended(
-          onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context)=> Record()));
+          onPressed: () async {
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => Record(),
+            ));
           },
           icon: Icon(
             Icons.add,
@@ -108,40 +166,7 @@ class _FundAvailableState extends State<FundAvailable> {
           ),
           backgroundColor: Colors.white,
         ),
-        drawer: Drawer(
-          child: ListView(
-            children: [
-              Center(
-                child: Container(
-                  child: Text(
-                    'image comming soon',
-                    style: TextStyle(color: Colors.red),
-                  ),
-                ),
-              ),
-              SizedBox(
-                height: 50.0,
-              ),
-              ListTile(
-                leading: Icon(Icons.person),
-                title: Text("Home"),
-                onTap: () {},
-              ),
-              ListTile(
-                leading: Icon(Icons.history),
-                title: Text("Transaction History"),
-                onTap: () {},
-              ),
-              ListTile(
-                leading: Icon(Icons.people),
-                title: Text("Memebers"),
-                onTap: () {
-                  Navigator.push(context,MaterialPageRoute(builder: (context)=> Members()));
-                },
-              )
-            ],
-          ),
-        ),
+        drawer: AppDrawer(),
       ),
     );
   }
