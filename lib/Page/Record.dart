@@ -29,7 +29,7 @@ class _RecordState extends State<Record> {
 
   @override
   Widget build(BuildContext context) {
-    bool isPopulated = isDataLoaded && selectedList.isNotEmpty && amount != 0;
+    bool isPopulated = selectedList.isNotEmpty && amount != 0;
 
     if (!isDataLoaded) {
       // DbRepository().getAuthorizedUsersIds().then((uids) {
@@ -82,7 +82,8 @@ class _RecordState extends State<Record> {
         body: SingleChildScrollView(
           child: Container(
             width: size.width,
-            height: size.height,
+            // height: size.height,
+            constraints: BoxConstraints(minHeight: size.height),
             decoration: BoxDecoration(
                 gradient: LinearGradient(
                     begin: Alignment.topRight,
@@ -238,69 +239,71 @@ class _RecordState extends State<Record> {
                                   ),
                                   onPressed: isPopulated
                                       ? () {
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(SnackBar(
-                                                  content:
-                                                      Text('Please wait')));
+                                          
                                           showDialog(
                                               context: context,
                                               builder:
                                                   (BuildContext dialogcontext) {
                                                 return AlertDialog(
-                                                  title: Expanded(
-                                                    child: Column(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .start,
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        Row(
-                                                          children: [
-                                                            Text(
-                                                              'Confirm ',
-                                                              style: TextStyle(
-                                                                  fontSize: 18),
-                                                            ),
-                                                            Text(
-                                                              '$itemName',
-                                                              style: TextStyle(
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold),
-                                                            ),
-                                                            Text(' of Rs.',
-                                                                style: TextStyle(
-                                                                    fontSize:
-                                                                        18)),
-                                                            Text(
-                                                              '$amount',
-                                                              style: TextStyle(
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                        Text(
-                                                            'Do you want to add ?',
+                                                  title: Column(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .start,
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Wrap(
+                                                        children: [
+                                                          Text(
+                                                            'Confirm ',
                                                             style: TextStyle(
-                                                                fontSize: 18))
-                                                      ],
-                                                    ),
+                                                                fontSize: 18),
+                                                          ),
+                                                          Text(
+                                                            '$itemName',
+                                                            style: TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold),
+                                                          ),
+                                                          Text(' of Rs.',
+                                                              style: TextStyle(
+                                                                  fontSize:
+                                                                      18)),
+                                                          Text(
+                                                            '$amount',
+                                                            style: TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      Text(
+                                                          'Do you want to add ?',
+                                                          style: TextStyle(
+                                                              fontSize: 18))
+                                                    ],
                                                   ),
                                                   actions: [
                                                     TextButton(
                                                       onPressed: () async {
-                                                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Adding transaction. Please wait')));
                                                         if (mounted)
-                                                        setState(() {
-                                                          amount = 0;
-                                                          itemName = '';
-                                                          selectedList = [];
-                                                        });
-                                                          Navigator.of(dialogcontext).pop();
+                                                            isPopulated = false;
+
+                                                        ScaffoldMessenger.of(
+                                                                context)
+                                                            .showSnackBar(SnackBar(
+                                                              duration: Duration(minutes: 1),
+                                                                content: Row(
+                                                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                  children: [
+                                                                    Text(
+                                                                        'Adding transaction. Please wait'),
+                                                                    CircularProgressIndicator(),
+                                                                  ],
+                                                                )));
 
                                                         //   // details added by buyer e.g  consumers,amount,
 
@@ -313,37 +316,40 @@ class _RecordState extends State<Record> {
                                                         });
 
                                                         UserModel currentUser =
-                                                            await DbRepository()
+                                                            await _dbRepository
                                                                 .getUserDetails(
                                                                     uuid: FirebaseAuth
                                                                         .instance
                                                                         .currentUser!
                                                                         .uid);
 
-                                                        DbRepository()
+                                                        _dbRepository
                                                             .addRecord(
-                                                              itemName:
-                                                                  itemName,
-                                                              amount: amount,
-                                                              recordedByUid:
-                                                                  currentUser
-                                                                      .uuid,
-                                                              consumersUids:
-                                                                  consumersUids,
-                                                              comment: comment,
-                                                              recordedBy:
-                                                                  currentUser
-                                                                      .name,
-                                                            )
-                                                            .then(
-                                                              (value) {
-                                                          Navigator.of(context).pop();
-                                                          }
-                                                                  // Navigator.of(
-                                                                  //         context)
-                                                                  //     .pop(),
-                                                            );
+                                                          itemName: itemName,
+                                                          amount: amount,
+                                                          recordedByUid:
+                                                              currentUser.uuid,
+                                                          consumersUids:
+                                                              consumersUids,
+                                                          comment: comment,
+                                                          recordedBy:
+                                                              currentUser.name,
+                                                        )
+                                                            .then((value) {
+                                                              ScaffoldMessenger.of(
+                                                                context).hideCurrentSnackBar();
+                                                          Navigator.of(context)
+                                                              .pop();
+                                                        }
+                                                                // Navigator.of(
+                                                                //         context)
+                                                                //     .pop(),
+                                                                );
 
+                                                        Navigator.of(
+                                                                dialogcontext)
+                                                            .pop();
+                                                        
                                                         //   // .addFund(
                                                         //   //   amount: 50,
                                                         //   //   userId: FirebaseAuth.instance.currentUser!.uid,
@@ -358,7 +364,9 @@ class _RecordState extends State<Record> {
                                                     ),
                                                     TextButton(
                                                         onPressed: () {
-                                                          Navigator.of(dialogcontext).pop();
+                                                          Navigator.of(
+                                                                  dialogcontext)
+                                                              .pop();
                                                         },
                                                         child: Text('No')),
                                                   ],
