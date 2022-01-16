@@ -173,36 +173,7 @@ class _AddFundState extends State<AddFund> {
                         ),
                         Center(
                           child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              primary: Colors.white, // background
-                              onPrimary: Colors.black, // foreground
-                            ),
-                            onPressed: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                      content: Text(
-                                          'Payment processing. Please wait')));
-                              // add amount by user
-                              _dbRepository
-                                  .addFund(
-                                amount: amount,
-                                userId: currentUserId,
-                                userName: widget.currentUser.name,
-                                paymentMethod: selectedPaymentMethod,
-                              )
-                                  .then((value) {
-                                ScaffoldMessenger.of(context)
-                                    .hideCurrentSnackBar();
-                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                    content: Text(
-                                        'Fund added in pending section. Contact Admin')));
-                                Future.delayed(Duration(seconds: 1))
-                                    .then((value) {
-                                  Navigator.of(context).pop();
-                                });
-                              });
-                            },
-                            child: Container(
+                            child:Container(
                               width: size.width * 0.17,
                               height: size.height * 0.06,
                               child: Row(
@@ -220,7 +191,73 @@ class _AddFundState extends State<AddFund> {
                                 ],
                               ),
                             ),
-                          ),
+                            style: ElevatedButton.styleFrom(
+                              primary: Colors.white, // background
+                              onPrimary: Colors.black, // foreground
+                            ),
+                            onPressed: () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                      content: Text(
+                                          'Payment processing. Please wait')));
+                              
+
+                              showDialog(context: context, builder: (BuildContext dialogcontext) {
+                                return AlertDialog(
+                                  title: Text('Do you want to add amount ?'),
+                                  actions: [
+                                    TextButton(onPressed: (){
+                                      _dbRepository
+                                      .addFund(
+                                      amount: amount,
+                                      userId: currentUserId,
+                                      userName: widget.currentUser.name,
+                                      paymentMethod: selectedPaymentMethod,
+                                    ) .then((value) {
+                                      ScaffoldMessenger.of(context)
+                                          .hideCurrentSnackBar();
+                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                          content: Text(
+                                              'Fund added in pending section. Contact Admin')));
+                                      Future.delayed(Duration(milliseconds: 200))
+                                          .then((value) {
+                                        Navigator.of(dialogcontext).pop();
+                                        Navigator.of(context).pop();
+                                      });
+                                    },);
+
+                                    }, child: Text('Yes')),
+                                    TextButton(onPressed:(){
+                                      Navigator.of(dialogcontext).pop();
+                                    } , child: Text('No')),
+                                    
+                                  ],
+                                );
+                              });
+                              
+                              // add amount by user
+
+                            //   _dbRepository
+                            //       .addFund(
+                            //     amount: amount,
+                            //     userId: currentUserId,
+                            //     userName: widget.currentUser.name,
+                            //     paymentMethod: selectedPaymentMethod,
+                            //   )
+                            //       .then((value) {
+                            //     ScaffoldMessenger.of(context)
+                            //         .hideCurrentSnackBar();
+                            //     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            //         content: Text(
+                            //             'Fund added in pending section. Contact Admin')));
+                            //     Future.delayed(Duration(seconds: 1))
+                            //         .then((value) {
+                            //       // Navigator.of(context).pop();
+                            //     });
+                            //   });
+                            // },
+                            
+                             }, )
                         )
                       ],
                     ),

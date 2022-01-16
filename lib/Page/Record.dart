@@ -29,6 +29,8 @@ class _RecordState extends State<Record> {
 
   @override
   Widget build(BuildContext context) {
+    bool isPopulated = isDataLoaded && selectedList.isNotEmpty && amount != 0;
+
     if (!isDataLoaded) {
       // DbRepository().getAuthorizedUsersIds().then((uids) {
       //   print(uids);
@@ -211,64 +213,164 @@ class _RecordState extends State<Record> {
                               height: 20.0,
                             ),
                             Center(
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  primary: Colors.white, // background
-                                  onPrimary: Colors.black, // foreground
-                                ),
-                                onPressed: () async {
-                                  // details added by buyer e.g  consumers,amount,
-
-                                  List<String> consumersUids = [];
-                                  selectedList.forEach((user) {
-                                    consumersUids.add(user['uuid']);
-                                  });
-
-                                  UserModel currentUser = await DbRepository()
-                                      .getUserDetails(
-                                          uuid: FirebaseAuth
-                                              .instance.currentUser!.uid);
-
-                                  DbRepository()
-                                      .addRecord(
-                                        itemName: itemName,
-                                        amount: amount,
-                                        recordedByUid: currentUser.uuid,
-                                        consumersUids: consumersUids,
-                                        comment: comment,
-                                        recordedBy: currentUser.name,
-                                      )
-                                      .then(
-                                        (value) => Navigator.of(context).pop(),
-                                      );
-
-                                  // .addFund(
-                                  //   amount: 50,
-                                  //   userId: FirebaseAuth.instance.currentUser!.uid,
-                                  //   userName: "M.K. Malik",
-                                  //   paymentMethod: "UPI",
-                                  //   comment: "Water",
-                                  // );
-                                },
-                                child: Container(
-                                  width: size.width * 0.17,
-                                  height: size.height * 0.06,
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.account_balance_wallet),
-                                      SizedBox(
-                                        width: 8.0,
-                                      ),
-                                      Text(
-                                        'Add',
-                                        style: cardItemTextStyle.copyWith(
-                                            fontSize: 17,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ],
+                              child: TextButton(
+                                  style: ElevatedButton.styleFrom(
+                                    primary: Colors.white, // background
+                                    onPrimary: Colors.black, // foreground
                                   ),
-                                ),
-                              ),
+                                  child: Container(
+                                    width: size.width * 0.17,
+                                    height: size.height * 0.06,
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.account_balance_wallet),
+                                        SizedBox(
+                                          width: 8.0,
+                                        ),
+                                        Text(
+                                          'Add',
+                                          style: cardItemTextStyle.copyWith(
+                                              fontSize: 17,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  onPressed: isPopulated
+                                      ? () {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(SnackBar(
+                                                  content:
+                                                      Text('Please wait')));
+                                          showDialog(
+                                              context: context,
+                                              builder:
+                                                  (BuildContext dialogcontext) {
+                                                return AlertDialog(
+                                                  title: Expanded(
+                                                    child: Column(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .start,
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Row(
+                                                          children: [
+                                                            Text(
+                                                              'Confirm ',
+                                                              style: TextStyle(
+                                                                  fontSize: 18),
+                                                            ),
+                                                            Text(
+                                                              '$itemName',
+                                                              style: TextStyle(
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold),
+                                                            ),
+                                                            Text(' of Rs.',
+                                                                style: TextStyle(
+                                                                    fontSize:
+                                                                        18)),
+                                                            Text(
+                                                              '$amount',
+                                                              style: TextStyle(
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        Text(
+                                                            'Do you want to add ?',
+                                                            style: TextStyle(
+                                                                fontSize: 18))
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  actions: [
+                                                    TextButton(
+                                                      onPressed: () async {
+                                                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Adding transaction. Please wait')));
+                                                        if (mounted)
+                                                        setState(() {
+                                                          amount = 0;
+                                                          itemName = '';
+                                                          selectedList = [];
+                                                        });
+                                                          Navigator.of(dialogcontext).pop();
+
+                                                        //   // details added by buyer e.g  consumers,amount,
+
+                                                        List<String>
+                                                            consumersUids = [];
+                                                        selectedList
+                                                            .forEach((user) {
+                                                          consumersUids.add(
+                                                              user['uuid']);
+                                                        });
+
+                                                        UserModel currentUser =
+                                                            await DbRepository()
+                                                                .getUserDetails(
+                                                                    uuid: FirebaseAuth
+                                                                        .instance
+                                                                        .currentUser!
+                                                                        .uid);
+
+                                                        DbRepository()
+                                                            .addRecord(
+                                                              itemName:
+                                                                  itemName,
+                                                              amount: amount,
+                                                              recordedByUid:
+                                                                  currentUser
+                                                                      .uuid,
+                                                              consumersUids:
+                                                                  consumersUids,
+                                                              comment: comment,
+                                                              recordedBy:
+                                                                  currentUser
+                                                                      .name,
+                                                            )
+                                                            .then(
+                                                              (value) {
+                                                          Navigator.of(context).pop();
+                                                          }
+                                                                  // Navigator.of(
+                                                                  //         context)
+                                                                  //     .pop(),
+                                                            );
+
+                                                        //   // .addFund(
+                                                        //   //   amount: 50,
+                                                        //   //   userId: FirebaseAuth.instance.currentUser!.uid,
+                                                        //   //   userName: "M.K. Malik",
+                                                        //   //   paymentMethod: "UPI",
+                                                        //   //   comment: "Water",
+                                                        //   // );
+                                                        // }, child: Text('f'),
+                                                        // : () {
+                                                      },
+                                                      child: Text('Yes'),
+                                                    ),
+                                                    TextButton(
+                                                        onPressed: () {
+                                                          Navigator.of(dialogcontext).pop();
+                                                        },
+                                                        child: Text('No')),
+                                                  ],
+                                                );
+                                              });
+                                        }
+                                      : () {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(SnackBar(
+                                                  content: Text(
+                                                      'Add all required fields')));
+                                        }),
                             )
                           ],
                         ),
