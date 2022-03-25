@@ -133,6 +133,7 @@ class DbRepository with ChangeNotifier {
       consumerNames.add(user.name);
     }
     var data = {
+      "verified": false,
       "recordUid": recordUid, // refernce uid of the transactions
       "itemName": itemName,
       "amount": amount,
@@ -153,6 +154,8 @@ class DbRepository with ChangeNotifier {
         .collection("transactions")
         .doc(recordUid)
         .set({});
+
+    // *********** calculation part started
 
     //// substract the amount from global fund scope
     // get the global fund amount and data
@@ -201,6 +204,9 @@ class DbRepository with ChangeNotifier {
       });
     }
   }
+
+  // TODO:
+  // Future<void> verifyRecord({}) {} 
 
   Future<UserModel> getUserDetails({required String uuid}) async {
     var snap = await _firestore.collection("users").doc(uuid).get();
@@ -258,9 +264,9 @@ class DbRepository with ChangeNotifier {
       users.add(user);
     }
 
-    print("# " * 10);
-    print(users);
-    print("# " * 10);
+    // print("# " * 10);
+    // print(users);
+    // print("# " * 10);
 
     return users;
   }

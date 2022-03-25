@@ -27,6 +27,8 @@ class _RecordState extends State<Record> {
 
   final DbRepository _dbRepository = DbRepository();
 
+  bool isButtonPressed = false;
+
   @override
   Widget build(BuildContext context) {
     if (!isDataLoaded) {
@@ -50,6 +52,12 @@ class _RecordState extends State<Record> {
               allUsers.add({"name": user.name, "uuid": user.uuid});
             });
         }
+
+        setState(() {
+          allUsers.forEach((user) {
+            selectedList.add(user);
+          });
+        });
       });
 
       if (mounted)
@@ -216,40 +224,88 @@ class _RecordState extends State<Record> {
                                   primary: Colors.white, // background
                                   onPrimary: Colors.black, // foreground
                                 ),
-                                onPressed: () async {
-                                  // details added by buyer e.g  consumers,amount,
+                                onPressed: isButtonPressed
+                                    ? () {}
+                                    : () async {
+                                        showDialog(
+                                            context: context,
+                                            builder:
+                                                (BuildContext dialogContext) {
+                                              String email = "";
+                                              return AlertDialog(
+                                                content: Column(
+                                                  children: [
+                                                    Text(
+                                                        "Do you really wanted to add this?"),
+                                                    Text(
+                                                        "Enter your email id to verify and make 'Yes' button visible"),
+                                                    TextField(
+                                                      onChanged: ((value) =>
+                                                          setState(() {
+                                                            email = value;
+                                                          })),
+                                                    ),
+                                                  ],
+                                                ),
+                                                actions: [
+                                                  TextButton(
+                                                      onPressed: () {
+                                                        Navigator.of(
+                                                                dialogContext)
+                                                            .pop();
+                                                      },
+                                                      child: Text('No')),
+                                                  if (email ==
+                                                      currentUser.email)
+                                                    TextButton(
+                                                        onPressed: () async {
+                                                          setState(() {
+                                                            isButtonPressed =
+                                                                true;
+                                                          });
+                                                          // details added by buyer e.g  consumers,amount,
 
-                                  List<String> consumersUids = [];
-                                  selectedList.forEach((user) {
-                                    consumersUids.add(user['uuid']);
-                                  });
+                                                          List<String>
+                                                              consumersUids =
+                                                              [];
+                                                          selectedList
+                                                              .forEach((user) {
+                                                            consumersUids.add(
+                                                                user['uuid']);
+                                                          });
 
-                                  UserModel currentUser = await DbRepository()
-                                      .getUserDetails(
-                                          uuid: FirebaseAuth
-                                              .instance.currentUser!.uid);
+                                                          UserModel
+                                                              currentUser =
+                                                              await DbRepository()
+                                                                  .getUserDetails(
+                                                                      uuid: FirebaseAuth
+                                                                          .instance
+                                                                          .currentUser!
+                                                                          .uid);
 
-                                  DbRepository()
-                                      .addRecord(
-                                        itemName: itemName,
-                                        amount: amount,
-                                        recordedByUid: currentUser.uuid,
-                                        consumersUids: consumersUids,
-                                        comment: comment,
-                                        recordedBy: currentUser.name,
-                                      )
-                                      .then(
-                                        (value) => Navigator.of(context).pop(),
-                                      );
+                                                          await DbRepository()
+                                                              .addRecord(
+                                                            itemName: itemName,
+                                                            amount: amount,
+                                                            recordedByUid:
+                                                                currentUser
+                                                                    .uuid,
+                                                            consumersUids:
+                                                                consumersUids,
+                                                            comment: comment,
+                                                            recordedBy:
+                                                                currentUser
+                                                                    .name,
+                                                          );
 
-                                  // .addFund(
-                                  //   amount: 50,
-                                  //   userId: FirebaseAuth.instance.currentUser!.uid,
-                                  //   userName: "M.K. Malik",
-                                  //   paymentMethod: "UPI",
-                                  //   comment: "Water",
-                                  // );
-                                },
+                                                          Navigator.of(context)
+                                                              .pop();
+                                                        },
+                                                        child: Text('Yes')),
+                                                ],
+                                              );
+                                            });
+                                      },
                                 child: Container(
                                   width: size.width * 0.17,
                                   height: size.height * 0.06,
@@ -260,7 +316,7 @@ class _RecordState extends State<Record> {
                                         width: 8.0,
                                       ),
                                       Text(
-                                        'Add',
+                                        isButtonPressed ? "..." : "Add",
                                         style: cardItemTextStyle.copyWith(
                                             fontSize: 17,
                                             fontWeight: FontWeight.bold),
