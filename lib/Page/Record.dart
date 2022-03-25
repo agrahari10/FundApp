@@ -27,6 +27,8 @@ class _RecordState extends State<Record> {
 
   final DbRepository _dbRepository = DbRepository();
 
+  bool isButtonPressed = false;
+
   @override
   Widget build(BuildContext context) {
     bool isPopulated = selectedList.isNotEmpty && amount != 0;
@@ -52,6 +54,12 @@ class _RecordState extends State<Record> {
               allUsers.add({"name": user.name, "uuid": user.uuid});
             });
         }
+
+        setState(() {
+          allUsers.forEach((user) {
+            selectedList.add(user);
+          });
+        });
       });
 
       if (mounted)
@@ -214,171 +222,114 @@ class _RecordState extends State<Record> {
                               height: 20.0,
                             ),
                             Center(
-                              child: TextButton(
-                                  style: ElevatedButton.styleFrom(
-                                    primary: Colors.white, // background
-                                    onPrimary: Colors.black, // foreground
-                                  ),
-                                  child: Container(
-                                    width: size.width * 0.17,
-                                    height: size.height * 0.06,
-                                    child: Row(
-                                      children: [
-                                        Icon(Icons.account_balance_wallet),
-                                        SizedBox(
-                                          width: 8.0,
-                                        ),
-                                        Text(
-                                          'Add',
-                                          style: cardItemTextStyle.copyWith(
-                                              fontSize: 17,
-                                              fontWeight: FontWeight.bold),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  onPressed: isPopulated
-                                      ? () {
-                                          
-                                          showDialog(
-                                              context: context,
-                                              builder:
-                                                  (BuildContext dialogcontext) {
-                                                return AlertDialog(
-                                                  title: Column(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .start,
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      Wrap(
-                                                        children: [
-                                                          Text(
-                                                            'Confirm ',
-                                                            style: TextStyle(
-                                                                fontSize: 18),
-                                                          ),
-                                                          Text(
-                                                            '$itemName',
-                                                            style: TextStyle(
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold),
-                                                          ),
-                                                          Text(' of Rs.',
-                                                              style: TextStyle(
-                                                                  fontSize:
-                                                                      18)),
-                                                          Text(
-                                                            '$amount',
-                                                            style: TextStyle(
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                      Text(
-                                                          'Do you want to add ?',
-                                                          style: TextStyle(
-                                                              fontSize: 18))
-                                                    ],
-                                                  ),
-                                                  actions: [
+
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  primary: Colors.white, // background
+                                  onPrimary: Colors.black, // foreground
+                                ),
+                                onPressed: isButtonPressed
+                                    ? () {}
+                                    : () async {
+                                        showDialog(
+                                            context: context,
+                                            builder:
+                                                (BuildContext dialogContext) {
+                                              String email = "";
+                                              return AlertDialog(
+                                                content: Column(
+                                                  children: [
+                                                    Text(
+                                                        "Do you really wanted to add this?"),
+                                                    Text(
+                                                        "Enter your email id to verify and make 'Yes' button visible"),
+                                                    TextField(
+                                                      onChanged: ((value) =>
+                                                          setState(() {
+                                                            email = value;
+                                                          })),
+                                                    ),
+                                                  ],
+                                                ),
+                                                actions: [
+                                                  TextButton(
+                                                      onPressed: () {
+                                                        Navigator.of(
+                                                                dialogContext)
+                                                            .pop();
+                                                      },
+                                                      child: Text('No')),
+                                                  if (email ==
+                                                      currentUser.email)
                                                     TextButton(
-                                                      onPressed: () async {
-                                                        if (mounted)
-                                                            isPopulated = false;
+                                                        onPressed: () async {
+                                                          setState(() {
+                                                            isButtonPressed =
+                                                                true;
+                                                          });
+                                                          // details added by buyer e.g  consumers,amount,
 
-                                                        ScaffoldMessenger.of(
-                                                                context)
-                                                            .showSnackBar(SnackBar(
-                                                              duration: Duration(minutes: 1),
-                                                                content: Row(
-                                                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                                  children: [
-                                                                    Text(
-                                                                        'Adding transaction. Please wait'),
-                                                                    CircularProgressIndicator(),
-                                                                  ],
-                                                                )));
+                                                          List<String>
+                                                              consumersUids =
+                                                              [];
+                                                          selectedList
+                                                              .forEach((user) {
+                                                            consumersUids.add(
+                                                                user['uuid']);
+                                                          });
 
-                                                        //   // details added by buyer e.g  consumers,amount,
+                                                          UserModel
+                                                              currentUser =
+                                                              await DbRepository()
+                                                                  .getUserDetails(
+                                                                      uuid: FirebaseAuth
+                                                                          .instance
+                                                                          .currentUser!
+                                                                          .uid);
 
-                                                        List<String>
-                                                            consumersUids = [];
-                                                        selectedList
-                                                            .forEach((user) {
-                                                          consumersUids.add(
-                                                              user['uuid']);
-                                                        });
+                                                          await DbRepository()
+                                                              .addRecord(
+                                                            itemName: itemName,
+                                                            amount: amount,
+                                                            recordedByUid:
+                                                                currentUser
+                                                                    .uuid,
+                                                            consumersUids:
+                                                                consumersUids,
+                                                            comment: comment,
+                                                            recordedBy:
+                                                                currentUser
+                                                                    .name,
+                                                          );
 
-                                                        UserModel currentUser =
-                                                            await _dbRepository
-                                                                .getUserDetails(
-                                                                    uuid: FirebaseAuth
-                                                                        .instance
-                                                                        .currentUser!
-                                                                        .uid);
-
-                                                        _dbRepository
-                                                            .addRecord(
-                                                          itemName: itemName,
-                                                          amount: amount,
-                                                          recordedByUid:
-                                                              currentUser.uuid,
-                                                          consumersUids:
-                                                              consumersUids,
-                                                          comment: comment,
-                                                          recordedBy:
-                                                              currentUser.name,
-                                                        )
-                                                            .then((value) {
-                                                              ScaffoldMessenger.of(
-                                                                context).hideCurrentSnackBar();
                                                           Navigator.of(context)
                                                               .pop();
-                                                        }
-                                                                // Navigator.of(
-                                                                //         context)
-                                                                //     .pop(),
-                                                                );
-
-                                                        Navigator.of(
-                                                                dialogcontext)
-                                                            .pop();
-                                                        
-                                                        //   // .addFund(
-                                                        //   //   amount: 50,
-                                                        //   //   userId: FirebaseAuth.instance.currentUser!.uid,
-                                                        //   //   userName: "M.K. Malik",
-                                                        //   //   paymentMethod: "UPI",
-                                                        //   //   comment: "Water",
-                                                        //   // );
-                                                        // }, child: Text('f'),
-                                                        // : () {
-                                                      },
-                                                      child: Text('Yes'),
-                                                    ),
-                                                    TextButton(
-                                                        onPressed: () {
-                                                          Navigator.of(
-                                                                  dialogcontext)
-                                                              .pop();
                                                         },
-                                                        child: Text('No')),
-                                                  ],
-                                                );
-                                              });
-                                        }
-                                      : () {
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(SnackBar(
-                                                  content: Text(
-                                                      'Add all required fields')));
-                                        }),
+                                                        child: Text('Yes')),
+                                                ],
+                                              );
+                                            });
+                                      },
+                                child: Container(
+                                  width: size.width * 0.17,
+                                  height: size.height * 0.06,
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.account_balance_wallet),
+                                      SizedBox(
+                                        width: 8.0,
+                                      ),
+                                      Text(
+                                        isButtonPressed ? "..." : "Add",
+                                        style: cardItemTextStyle.copyWith(
+                                            fontSize: 17,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+
                             )
                           ],
                         ),
