@@ -52,20 +52,22 @@ class _MembersState extends State<Members> {
     Size size = MediaQuery.of(context).size;
     return SafeArea(
       child: Scaffold(
-        floatingActionButton: FloatingActionButton.extended(
-          backgroundColor: Colors.black87,
-          onPressed: () {
-            Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => AddFund(
-                      currentUser: currentUser,
-                    )));
-          },
-          label: Row(
-            children: [
-              Icon(Icons.add),
-              Text('Add Fund'),
-            ],
-          ),
+        floatingActionButton: Container(     // floating disable while loading data 
+          child: isDataLoaded ? FloatingActionButton.extended(
+            backgroundColor: Colors.black87,
+            onPressed: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => AddFund(
+                        currentUser: currentUser,
+                      )));
+            },
+            label:Row(
+              children: [
+                Icon(Icons.add),
+                Text('Add Fund'),
+              ],
+            )
+          ):SizedBox(),
         ),
         appBar: AppBar(
           elevation: 0,

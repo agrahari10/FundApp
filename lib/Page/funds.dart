@@ -38,15 +38,15 @@ class _FundAvailableState extends State<FundAvailable> {
                       end: Alignment.bottomRight,
                       colors: [Color(0xFFF12711), Color(0xFFF12711)]))),
         ),
-        body: SingleChildScrollView(
-          child: Container(
-            width: size.width,
-            height: size.height,
-            decoration: BoxDecoration(
-                gradient: LinearGradient(
-                    begin: Alignment.topRight,
-                    end: Alignment.bottomRight,
-                    colors: [Color(0xFFF12711), Color(0xFFF5AF19)])),
+        body: Container(
+          width: size.width,
+          height: size.height,
+          decoration: BoxDecoration(
+              gradient: LinearGradient(
+                  begin: Alignment.topRight,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFFF12711), Color(0xFFF5AF19)])),
+          child: SingleChildScrollView(
             child: Column(
               children: [
                 Padding(
@@ -75,7 +75,7 @@ class _FundAvailableState extends State<FundAvailable> {
                               return CircularProgressIndicator();
                             else {
                               var data = snapshot.data.docs[0];
-
+          
                               print("* " * 20);
                               print(data);
                               return Text('Rs. ${data['totalFundAmount']}',
@@ -92,55 +92,57 @@ class _FundAvailableState extends State<FundAvailable> {
                         thickness: 1,
                       ),
                       Padding(
-                        padding: const EdgeInsets.only(top: 50),
-                        child: Column(
-                          children: [
-                            StreamBuilder(
-                              stream: FirebaseFirestore.instance
-                                  .collection("transactions")
-                                  .orderBy("timestamp", descending: true)
-                                  .snapshots(),
-                              builder: (context, AsyncSnapshot snapshot) {
-                                if (snapshot.data == null)
-                                  return CircularProgressIndicator();
-
-                                return SizedBox(
-                                  height: size.height * 0.7,
-                                  child: ListView.builder(
-                                    itemCount: snapshot.data.docs.length,
-                                    itemBuilder: (context, index) {
-                                      var data = snapshot.data.docs[index];
-                                      return Reusablecard(
-                                        item: data['itemName'],
-                                        size: size,
-                                        amount: data['amount'],
-                                        onPressed: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) => CardView(
-                                                amount: data['amount'],
-                                                comment: data['comment'],
-                                                consumersList:
-                                                    data['consumersUids'],
-                                                consumerNames:
-                                                    data['consumerNames'],
-                                                dateTime: DateTime
-                                                    .fromMillisecondsSinceEpoch(
-                                                        data['timestamp']),
-                                                item: data['itemName'],
-                                                recordedBy: data['recordedBy'],
+                        padding:  EdgeInsets.only(top: size.height*0.01),
+                        child: SingleChildScrollView(
+                          child: Column(
+                            children: [
+                              StreamBuilder(
+                                stream: FirebaseFirestore.instance
+                                    .collection("transactions")
+                                    .orderBy("timestamp", descending: true)
+                                    .snapshots(),
+                                builder: (context, AsyncSnapshot snapshot) {
+                                  if (snapshot.data == null)
+                                    return CircularProgressIndicator();
+                        
+                                  return SizedBox(
+                                    height: size.height * 0.7,
+                                    child: ListView.builder(
+                                      itemCount: snapshot.data.docs.length,
+                                      itemBuilder: (context, index) {
+                                        var data = snapshot.data.docs[index];
+                                        return Reusablecard(
+                                          item: data['itemName'],
+                                          size: size,
+                                          amount: data['amount'],
+                                          onPressed: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => CardView(
+                                                  amount: data['amount'],
+                                                  comment: data['comment'],
+                                                  consumersList:
+                                                      data['consumersUids'],
+                                                  consumerNames:
+                                                      data['consumerNames'],
+                                                  dateTime: DateTime
+                                                      .fromMillisecondsSinceEpoch(
+                                                          data['timestamp']),
+                                                  item: data['itemName'],
+                                                  recordedBy: data['recordedBy'],
+                                                ),
                                               ),
-                                            ),
-                                          );
-                                        },
-                                      );
-                                    },
-                                  ),
-                                );
-                              },
-                            ),
-                          ],
+                                            );
+                                          },
+                                        );
+                                      },
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ],

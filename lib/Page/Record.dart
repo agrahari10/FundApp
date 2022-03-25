@@ -31,6 +31,8 @@ class _RecordState extends State<Record> {
 
   @override
   Widget build(BuildContext context) {
+    bool isPopulated = selectedList.isNotEmpty && amount != 0;
+
     if (!isDataLoaded) {
       // DbRepository().getAuthorizedUsersIds().then((uids) {
       //   print(uids);
@@ -88,7 +90,8 @@ class _RecordState extends State<Record> {
         body: SingleChildScrollView(
           child: Container(
             width: size.width,
-            height: size.height,
+            // height: size.height,
+            constraints: BoxConstraints(minHeight: size.height),
             decoration: BoxDecoration(
                 gradient: LinearGradient(
                     begin: Alignment.topRight,
@@ -219,6 +222,7 @@ class _RecordState extends State<Record> {
                               height: 20.0,
                             ),
                             Center(
+
                               child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(
                                   primary: Colors.white, // background
@@ -325,6 +329,7 @@ class _RecordState extends State<Record> {
                                   ),
                                 ),
                               ),
+
                             )
                           ],
                         ),
